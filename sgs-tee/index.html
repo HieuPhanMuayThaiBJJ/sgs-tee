@@ -359,14 +359,10 @@ function variants(base){
 function resolveImg(base){
   if(/\.(jpe?g|png|webp)$/i.test(base)) return Promise.resolve(base);
   if(_cache[base]) return _cache[base];
-  return _cache[base] = (async () => {
-    for(const [b,e] of variants(base)){
-      const u = `${b}.${e}`;
-      const ok = await new Promise(r => { const i = new Image(); i.onload = () => r(true); i.onerror = () => r(false); i.src = u; });
-      if(ok) return u;
-    }
-    return null;
-  })();
+  /* thử song song mọi biến thể tên/đuôi, lấy cái đầu tiên (theo thứ tự ưu tiên) tải được */
+  return _cache[base] = Promise.all(variants(base).map(([b,e]) => new Promise(r => {
+    const u = `${b}.${e}`, i = new Image(); i.onload = () => r(u); i.onerror = () => r(null); i.src = u;
+  }))).then(a => a.find(Boolean) || null);
 }
 const COLORS = [
   { id:"trang",     name:"Trắng",      hex:"#f4f1e8", images:{front:"images/model-1", angle:"images/model-2", detail:"images/model-3", back:"images/model-back"} },
@@ -390,9 +386,11 @@ const $ = id => document.getElementById(id);
 const heroImg = $("mainImg");
 
 function loadInto(img, colorObj, key, onFallback){
+  const t = img._t = (img._t || 0) + 1;   /* bỏ kết quả cũ nếu đã đổi màu */
   resolveImg(colorObj.images[key]).then(u => {
+    if(img._t !== t) return;
     if(u){ img.src = u; img.classList.remove("hide"); return; }
-    resolveImg(FALLBACK.images[key]).then(f => { if(f) img.src = f; img.classList.remove("hide"); if(onFallback) onFallback(); });
+    resolveImg(FALLBACK.images[key]).then(f => { if(img._t !== t) return; if(f) img.src = f; img.classList.remove("hide"); if(onFallback) onFallback(); });
   });
 }
 /* ảnh tĩnh: logo, bảng size, QR */
