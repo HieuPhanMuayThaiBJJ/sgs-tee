@@ -348,12 +348,20 @@ const PRICE = 159000;
 const fmt = n => n.toLocaleString("vi-VN") + "đ";
 const EXTS = ["jpg","jpeg","png","webp","JPG","JPEG","PNG","WEBP"];
 const _cache = {};
+/* tên file không phân biệt hoa thường: front / Front / FRONT */
+function variants(base){
+  const i = base.lastIndexOf("/"), dir = base.slice(0, i+1), n = base.slice(i+1);
+  const names = [n, n.charAt(0).toUpperCase() + n.slice(1), n.toUpperCase()].filter((x,k,arr) => arr.indexOf(x) === k);
+  const out = [];
+  for(const nm of names) for(const e of EXTS) out.push([dir + nm, e]);
+  return out;
+}
 function resolveImg(base){
   if(/\.(jpe?g|png|webp)$/i.test(base)) return Promise.resolve(base);
   if(_cache[base]) return _cache[base];
   return _cache[base] = (async () => {
-    for(const e of EXTS){
-      const u = `${base}.${e}`;
+    for(const [b,e] of variants(base)){
+      const u = `${b}.${e}`;
       const ok = await new Promise(r => { const i = new Image(); i.onload = () => r(true); i.onerror = () => r(false); i.src = u; });
       if(ok) return u;
     }
