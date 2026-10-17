@@ -171,6 +171,11 @@ dd{font-weight:600}
 .line .lp{font-weight:600;font-size:14px;min-width:74px;text-align:right}
 @media(max-width:520px){.line{grid-template-columns:auto 1fr auto}.line .qty{grid-column:2;grid-row:2;justify-self:start}.line .lp{grid-column:3;grid-row:2}.line .rm{grid-column:3;grid-row:1}}
 
+.notice{display:none;max-width:640px;margin:10px auto 0;background:#fff;border-radius:24px;padding:38px 30px;text-align:center}
+.notice h3{font-size:26px;font-weight:700;letter-spacing:-.01em;margin-bottom:14px}
+.notice p{font-size:18px;line-height:1.55;color:#424245;margin-top:12px}
+.closed .notice{display:block}
+.closed .ogrid,.closed #orderLead,.closed .bar,.closed nav .buy,.closed .cta-row .pill,.closed nav .links a[href="#dang-ky"]{display:none!important}
 footer{padding:34px 22px;text-align:center;font-size:12px;color:var(--mute);border-top:1px solid var(--line)}
 
 /* sticky buy */
@@ -265,8 +270,13 @@ footer{padding:34px 22px;text-align:center;font-size:12px;color:var(--mute);bord
 <!-- ORDER -->
 <section class="order" id="dang-ky">
   <div class="wrap">
-    <h2>Đặt áo của bạn.</h2>
-    <p class="lead">Chọn màu, size, số lượng, chuyển khoản, rồi gửi thông tin. Giá 159.000đ/áo.</p>
+    <h2 id="orderTitle">Đặt áo của bạn.</h2>
+    <p class="lead" id="orderLead">Chọn màu, size, số lượng, chuyển khoản, rồi gửi thông tin. Giá 159.000đ/áo.</p>
+    <div class="notice" id="closedNotice">
+      <h3>Đơn hàng đã đóng</h3>
+      <p>Đơn hàng đã đóng lại lúc 22:00 ngày 17/10/2026. Hiện tại SGS đang xử lý các đơn hàng này và các bạn sẽ bắt đầu nhận hàng từ ngày 23/10/2026.</p>
+      <p>Chúng mình xin cảm ơn các bạn đã ủng hộ SGS khi lò còn chưa chuẩn bị xong haha!</p>
+    </div>
     <div class="ogrid">
 
       <form class="card" id="form" novalidate>
@@ -523,6 +533,7 @@ const show = (t, x) => { msg.className = "msg " + t; msg.textContent = x; };
 
 form.addEventListener("submit", async e => {
   e.preventDefault();
+  if(isClosed()){ applyClosed(); return show("err", "Đơn hàng đã đóng lúc 22:00 ngày 17/10/2026."); }
   const name = nameEl.value.trim(), phone = phoneEl.value.replace(/\s/g,"");
   const paid = $("paid").checked;
   if(!name) return show("err", "Bạn chưa nhập tên.");
@@ -549,6 +560,17 @@ form.addEventListener("submit", async e => {
   }catch(err){ show("err", "Gửi không thành công, vui lòng thử lại."); }
   finally{ btn.disabled = false; btn.textContent = "Submit"; }
 });
+
+/* ============ ĐÓNG ĐƠN: tự chuyển sang thông báo lúc 22:00 ngày 17/10/2026 (giờ Việt Nam) ============ */
+const CLOSE_AT = new Date("2026-10-17T22:00:00+07:00");
+const isClosed = () => Date.now() >= CLOSE_AT.getTime();
+function applyClosed(){
+  if(!isClosed()) return false;
+  document.body.classList.add("closed");
+  $("orderTitle").textContent = "Đơn hàng đã đóng.";
+  return true;
+}
+if(!applyClosed()){ const tm = setInterval(() => { if(applyClosed()) clearInterval(tm); }, 10000); }
 
 renderCart(); refreshAll();
 </script>
