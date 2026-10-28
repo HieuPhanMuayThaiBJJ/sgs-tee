@@ -175,6 +175,15 @@ dd{font-weight:600}
 .notice h3{font-size:26px;font-weight:700;letter-spacing:-.01em;margin-bottom:14px}
 .notice p{font-size:18px;line-height:1.55;color:#424245;margin-top:12px}
 .closed .notice{display:block}
+.cd{margin:22px auto 0;text-align:center}
+.cd[hidden]{display:none}
+.cd-label{font-size:13px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#6e6e73;margin-bottom:10px}
+.cd-row{display:flex;justify-content:center;gap:10px}
+.cd-row>div{min-width:68px;padding:12px 8px 10px;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:16px}
+.cd-n{display:block;font-size:30px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums;color:#1d1d1f}
+.cd-row i{display:block;margin-top:4px;font-style:normal;font-size:12px;color:#6e6e73}
+.cd-range{margin-top:10px;font-size:13px;color:#6e6e73}
+@media(max-width:480px){.cd-row{gap:6px}.cd-row>div{min-width:58px;padding:10px 4px 8px}.cd-n{font-size:24px}}
 .closed .ogrid,.closed #orderLead,.closed .bar,.closed nav .buy,.closed .cta-row .pill,.closed nav .links a[href="#dang-ky"]{display:none!important}
 footer{padding:34px 22px;text-align:center;font-size:12px;color:var(--mute);border-top:1px solid var(--line)}
 
@@ -212,6 +221,7 @@ footer{padding:34px 22px;text-align:center;font-size:12px;color:var(--mute);bord
       <a class="pill" href="#dang-ky">Đăng ký</a>
       <a class="link" href="#chi-tiet">Xem chi tiết</a>
     </div>
+    <div class="cd" hidden><div class="cd-label">Pre-order đóng sau</div><div class="cd-row"><div><b class="cd-n">0</b><i>ngày</i></div><div><b class="cd-n">00</b><i>giờ</i></div><div><b class="cd-n">00</b><i>phút</i></div><div><b class="cd-n">00</b><i>giây</i></div></div><div class="cd-range">Pre-order 28/10 – 29/10/2026</div></div>
     <div class="stage">
       <div class="hero-img" id="heroImg"><img id="mainImg" src="" alt="Áo thun SGS"></div>
     </div>
@@ -272,10 +282,11 @@ footer{padding:34px 22px;text-align:center;font-size:12px;color:var(--mute);bord
   <div class="wrap">
     <h2 id="orderTitle">Đặt áo của bạn.</h2>
     <p class="lead" id="orderLead">Chọn màu, size, số lượng, chuyển khoản, rồi gửi thông tin. Giá 159.000đ/áo.</p>
+    <div class="cd" hidden><div class="cd-label">Pre-order đóng sau</div><div class="cd-row"><div><b class="cd-n">0</b><i>ngày</i></div><div><b class="cd-n">00</b><i>giờ</i></div><div><b class="cd-n">00</b><i>phút</i></div><div><b class="cd-n">00</b><i>giây</i></div></div><div class="cd-range">Pre-order 28/10 – 29/10/2026</div></div>
     <div class="notice" id="closedNotice">
-      <h3>Đơn hàng đã đóng</h3>
-      <p>Đơn hàng đã đóng lại lúc 22:00 ngày 17/10/2026. Hiện tại SGS đang xử lý các đơn hàng này và các bạn sẽ bắt đầu nhận hàng từ ngày 23/10/2026.</p>
-      <p>Chúng mình xin cảm ơn các bạn đã ủng hộ SGS khi lò còn chưa chuẩn bị xong haha!</p>
+      <h3 id="nTitle"></h3>
+      <p id="nP1"></p>
+      <p id="nP2"></p>
     </div>
     <div class="ogrid">
 
@@ -533,7 +544,7 @@ const show = (t, x) => { msg.className = "msg " + t; msg.textContent = x; };
 
 form.addEventListener("submit", async e => {
   e.preventDefault();
-  if(isClosed()){ applyClosed(); return show("err", "Đơn hàng đã đóng lúc 22:00 ngày 17/10/2026."); }
+  if(isClosed()){ applyClosed(); return show("err", "Hiện chưa trong thời gian nhận đơn (28/10 – 29/10/2026)."); }
   const name = nameEl.value.trim(), phone = phoneEl.value.replace(/\s/g,"");
   const paid = $("paid").checked;
   if(!name) return show("err", "Bạn chưa nhập tên.");
@@ -561,17 +572,41 @@ form.addEventListener("submit", async e => {
   finally{ btn.disabled = false; btn.textContent = "Submit"; }
 });
 
-/* ============ ĐÓNG ĐƠN: tự chuyển sang thông báo lúc 22:00 ngày 17/10/2026 (giờ Việt Nam) ============ */
-const CLOSE_AT = new Date("2026-10-17T22:00:00+07:00");
-const isClosed = () => Date.now() >= CLOSE_AT.getTime();
+/* ============ ĐÓNG ĐƠN: pre-order 28/10 00:00 đến 29/10 23:59:59 (giờ Việt Nam) ============ */
+const OPEN_AT = new Date("2026-10-28T00:00:00+07:00");
+const CLOSE_AT = new Date("2026-10-29T23:59:59+07:00");
+const phase = () => { const n = Date.now(); return n < OPEN_AT.getTime() ? "upcoming" : (n >= CLOSE_AT.getTime() ? "closed" : "open"); };
+const isClosed = () => phase() !== "open";
+const p2 = n => String(n).padStart(2, "0");
 function applyClosed(){
-  if(!isClosed()) return false;
-  document.body.classList.add("closed");
-  $("orderTitle").textContent = "Đơn hàng đã đóng.";
-  return true;
+  const ph = phase();
+  document.body.classList.toggle("closed", ph !== "open");
+  const target = ph === "upcoming" ? OPEN_AT : CLOSE_AT;
+  const s = Math.floor(Math.max(0, target.getTime() - Date.now()) / 1000);
+  const vals = [Math.floor(s / 86400), p2(Math.floor(s % 86400 / 3600)), p2(Math.floor(s % 3600 / 60)), p2(s % 60)];
+  document.querySelectorAll(".cd").forEach(el => {
+    el.hidden = ph === "closed";
+    el.querySelector(".cd-label").textContent = ph === "upcoming" ? "Pre-order mở sau" : "Pre-order đóng sau";
+    el.querySelectorAll(".cd-n").forEach((n, i) => { n.textContent = vals[i]; });
+  });
+  const title = $("orderTitle");
+  if(ph === "upcoming"){
+    title.textContent = "Pre-order sắp mở.";
+    $("nTitle").textContent = "Chưa đến giờ mở đơn";
+    $("nP1").textContent = "Pre-order đợt mới mở từ 00:00 ngày 28/10/2026 đến hết ngày 29/10/2026.";
+    $("nP2").textContent = "Quay lại trang này khi đồng hồ đếm về 0 nhé.";
+  } else if(ph === "closed"){
+    title.textContent = "Đơn hàng đã đóng.";
+    $("nTitle").textContent = "Pre-order đã kết thúc";
+    $("nP1").textContent = "Đợt pre-order 28/10 – 29/10/2026 đã đóng. Chúng mình đang xử lý các đơn đã nhận.";
+    $("nP2").textContent = "Cảm ơn các bạn đã ủng hộ SGS!";
+  } else {
+    title.textContent = "Đặt áo của bạn.";
+  }
+  return ph !== "open";
 }
-if(!applyClosed()){ const tm = setInterval(() => { if(applyClosed()) clearInterval(tm); }, 10000); }
-
+applyClosed();
+setInterval(applyClosed, 1000);
 renderCart(); refreshAll();
 </script>
 </body>
