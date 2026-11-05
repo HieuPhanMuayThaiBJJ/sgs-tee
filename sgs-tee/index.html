@@ -221,7 +221,7 @@ footer{padding:34px 22px;text-align:center;font-size:12px;color:var(--mute);bord
       <a class="pill" href="#dang-ky">Đăng ký</a>
       <a class="link" href="#chi-tiet">Xem chi tiết</a>
     </div>
-    <div class="cd" hidden><div class="cd-label">Pre-order đóng sau</div><div class="cd-row"><div><b class="cd-n">0</b><i>ngày</i></div><div><b class="cd-n">00</b><i>giờ</i></div><div><b class="cd-n">00</b><i>phút</i></div><div><b class="cd-n">00</b><i>giây</i></div></div><div class="cd-range">Pre-order 04/11 – 06/11/2026</div></div>
+    <div class="cd" hidden><div class="cd-label">Pre-order đóng sau</div><div class="cd-row"><div><b class="cd-n">0</b><i>ngày</i></div><div><b class="cd-n">00</b><i>giờ</i></div><div><b class="cd-n">00</b><i>phút</i></div><div><b class="cd-n">00</b><i>giây</i></div></div><div class="cd-range">Pre-order 04/11 – 12:00 07/11/2026</div></div>
     <div class="stage">
       <div class="hero-img" id="heroImg"><img id="mainImg" src="" alt="Áo thun SGS"></div>
     </div>
@@ -282,7 +282,7 @@ footer{padding:34px 22px;text-align:center;font-size:12px;color:var(--mute);bord
   <div class="wrap">
     <h2 id="orderTitle">Đặt áo của bạn.</h2>
     <p class="lead" id="orderLead">Chọn màu, size, số lượng, chuyển khoản, rồi gửi thông tin. Giá 159.000đ/áo.</p>
-    <div class="cd" hidden><div class="cd-label">Pre-order đóng sau</div><div class="cd-row"><div><b class="cd-n">0</b><i>ngày</i></div><div><b class="cd-n">00</b><i>giờ</i></div><div><b class="cd-n">00</b><i>phút</i></div><div><b class="cd-n">00</b><i>giây</i></div></div><div class="cd-range">Pre-order 04/11 – 06/11/2026</div></div>
+    <div class="cd" hidden><div class="cd-label">Pre-order đóng sau</div><div class="cd-row"><div><b class="cd-n">0</b><i>ngày</i></div><div><b class="cd-n">00</b><i>giờ</i></div><div><b class="cd-n">00</b><i>phút</i></div><div><b class="cd-n">00</b><i>giây</i></div></div><div class="cd-range">Pre-order 04/11 – 12:00 07/11/2026</div></div>
     <div class="notice" id="closedNotice">
       <h3 id="nTitle"></h3>
       <p id="nP1"></p>
@@ -544,7 +544,7 @@ const show = (t, x) => { msg.className = "msg " + t; msg.textContent = x; };
 
 form.addEventListener("submit", async e => {
   e.preventDefault();
-  if(isClosed()){ applyClosed(); return show("err", "Hiện chưa trong thời gian nhận đơn (04/11 – 06/11/2026)."); }
+  if(isClosed()){ applyClosed(); return show("err", "Hiện chưa trong thời gian nhận đơn (04/11 – 12:00 07/11/2026)."); }
   const name = nameEl.value.trim(), phone = phoneEl.value.replace(/\s/g,"");
   const paid = $("paid").checked;
   if(!name) return show("err", "Bạn chưa nhập tên.");
@@ -572,9 +572,9 @@ form.addEventListener("submit", async e => {
   finally{ btn.disabled = false; btn.textContent = "Submit"; }
 });
 
-/* ============ ĐÓNG ĐƠN: pre-order 04/11 00:00 đến 06/11 23:59:59 (giờ Việt Nam) ============ */
+/* ============ ĐÓNG ĐƠN: pre-order 04/11 00:00 đến 07/11 12:00 (giờ Việt Nam) ============ */
 const OPEN_AT = new Date("2026-11-04T00:00:00+07:00");
-const CLOSE_AT = new Date("2026-11-06T23:59:59+07:00");
+const CLOSE_AT = new Date("2026-11-07T12:00:00+07:00");
 const phase = () => { const n = Date.now(); return n < OPEN_AT.getTime() ? "upcoming" : (n >= CLOSE_AT.getTime() ? "closed" : "open"); };
 const isClosed = () => phase() !== "open";
 const p2 = n => String(n).padStart(2, "0");
@@ -593,12 +593,12 @@ function applyClosed(){
   if(ph === "upcoming"){
     title.textContent = "Pre-order sắp mở.";
     $("nTitle").textContent = "Chưa đến giờ mở đơn";
-    $("nP1").textContent = "Pre-order đợt mới mở từ 00:00 ngày 04/11/2026 đến hết ngày 06/11/2026.";
+    $("nP1").textContent = "Pre-order đợt mới mở từ 00:00 ngày 04/11/2026 đến 12:00 ngày 07/11/2026.";
     $("nP2").textContent = "Quay lại trang này khi đồng hồ đếm về 0 nhé.";
   } else if(ph === "closed"){
     title.textContent = "Đơn hàng đã đóng.";
     $("nTitle").textContent = "Pre-order đã kết thúc";
-    $("nP1").textContent = "Đợt pre-order 04/11 – 06/11/2026 đã đóng. Chúng mình đang xử lý các đơn đã nhận.";
+    $("nP1").textContent = "Đợt pre-order 04/11 – 12:00 07/11/2026 đã đóng. Chúng mình đang xử lý các đơn đã nhận.";
     $("nP2").textContent = "Cảm ơn các bạn đã ủng hộ SGS!";
   } else {
     title.textContent = "Đặt áo của bạn.";
